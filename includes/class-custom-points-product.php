@@ -34,6 +34,10 @@ class WC_Product_Points extends WC_Product {
 		return apply_filters( 'woocommerce_is_purchasable', false, $this );
     }
 
+    public function process_points( $post_id ){
+        $this->deduct_points( $post_id );
+    }
+
     private function deduct_points( $post_id ){
 
         global $wpdb;
@@ -41,13 +45,6 @@ class WC_Product_Points extends WC_Product {
 
         // remove points
         WC_Points_Rewards_Manager::decrease_points( get_current_user_id(), $points_to_deduct[0], 'point-product-reward');
-
-    }
-
-    public function process_points( $post_id ){
-        $this->deduct_points( $post_id );
-
-
 
     }
 }
