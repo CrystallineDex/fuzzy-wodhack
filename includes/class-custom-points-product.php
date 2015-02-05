@@ -35,7 +35,9 @@ class WC_Product_Points extends WC_Product {
     }
 
     public function process_points( $post_id ){
-        $this->deduct_points( $post_id );
+        $points_to_deduct = get_post_meta($post_id, 'points_product_cost');
+
+        $this->deduct_points( $post_id, $points_to_deduct[0] );
     }
 
     private function create_order_info(){
@@ -54,12 +56,7 @@ class WC_Product_Points extends WC_Product {
     }
 
     private function deduct_points( $post_id, $points ){
-
-        global $wpdb;
-        $points_to_deduct = get_post_meta($post_id, 'points_product_cost');
-
         // remove points
-        WC_Points_Rewards_Manager::decrease_points( get_current_user_id(), $points_to_deduct[0], 'point-product-reward');
-
+        WC_Points_Rewards_Manager::decrease_points( get_current_user_id(), $points, 'point-product-reward');
     }
 }
