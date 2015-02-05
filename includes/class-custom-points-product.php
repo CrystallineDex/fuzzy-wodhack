@@ -38,7 +38,22 @@ class WC_Product_Points extends WC_Product {
         $this->deduct_points( $post_id );
     }
 
-    private function deduct_points( $post_id ){
+    private function create_order_info(){
+        $order_info = array(
+            'user' => get_current_user_id(),
+            'code' => $this->create_code()
+        );
+
+        return $order_info;
+    }
+
+    private function create_code(){
+        $unique_code = md5(rand(0,10000000));
+
+        return $unique_code;
+    }
+
+    private function deduct_points( $post_id, $points ){
 
         global $wpdb;
         $points_to_deduct = get_post_meta($post_id, 'points_product_cost');
