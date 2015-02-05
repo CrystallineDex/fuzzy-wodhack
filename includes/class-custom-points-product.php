@@ -40,19 +40,16 @@ class WC_Product_Points extends WC_Product {
         // Add conditional for if user has 0 points or less.
         $this->deduct_points( $post_id, $points_to_deduct[0] );
 
-        $order_info = $this->create_order_info( $post_id, $points_to_deduct );
+        $order = $this->create_order_info( $post_id, $points_to_deduct );
 
     }
 
     private function create_order_info( $product_id, $points ){
-        $order_info = array(
-            'user' => get_current_user_id(),
-            'vendor' => $this->get_vendor_id( $product_id ),
-            'code' => $this->create_code(),
-            'points' => $points[0],
-        );
+        $order = wc_create_order( array( 'customer_id' => get_current_user_id() ) );
 
-        return $order_info;
+        $order->add_product( get_product( $product_id ), 1 );
+
+        return $order;
     }
 
     private function create_code(){
