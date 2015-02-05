@@ -49,14 +49,14 @@ class WC_Product_Points extends WC_Product {
             'user' => get_current_user_id(),
             'vendor' => $this->get_vendor_id( $product_id ),
             'code' => $this->create_code(),
-            'points' => $points,
+            'points' => $points[0],
         );
 
         return $order_info;
     }
 
     private function create_code(){
-        $unique_code = md5(rand(0,10000000));
+        $unique_code = $this->randomNumber(6);
 
         return $unique_code;
     }
@@ -66,9 +66,19 @@ class WC_Product_Points extends WC_Product {
         WC_Points_Rewards_Manager::decrease_points( get_current_user_id(), $points, 'point-product-reward');
     }
 
-    public function get_vendor_id( $product_id ){
+    private function get_vendor_id( $product_id ){
         $author = WCV_Vendors::get_vendor_from_product( $product_id );
 
         return $author;
+    }
+
+    private function randomNumber($length) {
+        $result = '';
+
+        for($i = 0; $i < $length; $i++) {
+            $result .= mt_rand(0, 9);
+        }
+
+        return $result;
     }
 }
