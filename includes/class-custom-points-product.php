@@ -38,7 +38,6 @@ class WC_Product_Points extends WC_Product {
 
         global $wpdb;
         $points_to_deduct = get_post_meta($post_id, 'points_product_cost');
-        echo 'Reducing points by ' . $points_to_deduct[0];
 
         // remove points
         WC_Points_Rewards_Manager::decrease_points( get_current_user_id(), $points_to_deduct[0], 'point-product-reward');
@@ -47,5 +46,8 @@ class WC_Product_Points extends WC_Product {
 
     public function process_points( $post_id ){
         $this->deduct_points( $post_id );
+
+
+
     }
 }
