@@ -40,15 +40,9 @@ class WC_Custom_Points {
 
     // indicates we are running the admin
     if ( is_admin() ) {
-      // ...
+      require_once( plugin_dir_path . '/includes/admin/class-main-admin.php' );
+      $adminDashboard = new Custom_Points_Main_Admin();
     }
-
-    // indicates we are being served over ssl
-    if ( is_ssl() ) {
-      // ...
-    }
-
-    // take care of anything else that needs to be done immediately upon plugin instantiation, here in the constructor
   }
 
   /**
@@ -80,7 +74,6 @@ class WC_Custom_Points {
   public function plugins_loaded() {
 
       // Load plugin class files
-      require_once( plugin_dir_path . '/includes/admin/class-main-admin.php' );
       require_once( plugin_dir_path . '/includes/class-custom-points-product.php' );
       require_once( plugin_dir_path . '/includes/class-custom-points-product-settings.php' );
       require_once( plugin_dir_path . '/includes/class-custom-points-order.php' );
