@@ -37,15 +37,8 @@ class WC_Points_Payment extends WC_Payment_Gateway {
 		$this->init_settings();
 
 		$this->title        = $this->settings['title'];
-		$wcaf_settings      = get_option( 'wcaf_settings' );
 
-		$description = sprintf( __( "Available balance: %s", 'woocommerce-account-funds'), WC_Account_Funds::get_account_funds() );
-
-		if ( 'yes' === get_option( 'account_funds_give_discount' ) ) {
-			$amount      = floatval( get_option( 'account_funds_discount_amount' ) );
-			$amount      = 'fixed' === get_option( 'account_funds_discount_type' ) ? wc_price( $amount ) : $amount . '%';
-			$description .= '<br/><em>' . sprintf( __( 'Use your account funds and get a %s discount on your order.', 'woocommerce-account-funds' ), $amount ) . '</em>';
-		}
+		$description = sprintf( __( "Available balance: %s", 'custom-points-product'), WC_Points_Rewards_Manager::get_users_points(get_current_user_id()) );
 
 		$this->description = $description;
 
@@ -63,7 +56,7 @@ class WC_Points_Payment extends WC_Payment_Gateway {
 	public function is_available() {
 		$is_available = ( 'yes' === $this->enabled ) ? true : false;
 
-		if ( WC_Account_Funds_Cart_Manager::cart_contains_deposit() || WC_Account_Funds_Cart_Manager::using_funds() ) {
+		if ( WC_Points_Rewards_Manager::get_users_points(get_current_user_id()) <= 0 ) {
 			$is_available = false;
 		}
 
@@ -85,7 +78,7 @@ class WC_Points_Payment extends WC_Payment_Gateway {
 				'title'       => __( 'Title', 'woothemes' ),
 				'type'        => 'text',
 				'description' => __( 'This controls the title which the user sees during checkout.', 'woothemes' ),
-				'default'     => __( 'Account Funds', 'woocommerce-account-funds' )
+				'default'     => __( 'Points Payment', 'custom-points-product' )
 			)
 		);
 	}
@@ -97,21 +90,22 @@ class WC_Points_Payment extends WC_Payment_Gateway {
 		$order  = wc_get_order( $order_id );
 
 		if ( ! is_user_logged_in() ) {
-			wc_add_notice( __( 'Payment error:', 'woocommerce-account-funds' ) . ' ' . __( 'You must be logged in to use this payment method', 'woocommerce-account-funds' ), 'error' );
+			wc_add_notice( __( 'Payment error:', 'custom-points-product' ) . ' ' . __( 'You must be logged in to use this payment method', 'custom-points-product' ), 'error' );
+			return;
+		}
+        
+        $user_id = $order->get_user_id();
+        $available_points = WC_Points_Rewards_Manager::get_users_points( $user_id );
+        $total_points = Custom_Points_Order::get_order_points_cost_total( $order );
+
+		if ( $available_points < $total_points ) {
+			wc_add_notice( __( 'Payment error:', 'custom-points-product' ) . ' ' . __( 'Insufficient points in your account.', 'custom-points-product' ), 'error' );
 			return;
 		}
 
-		$available_funds = WC_Account_Funds::get_account_funds( $order->get_user_id(), false, $order_id );
-
-		if ( $available_funds < $order->get_total() ) {
-			wc_add_notice( __( 'Payment error:', 'woocommerce-account-funds' ) . ' ' . __( 'Insufficient account balance', 'woocommerce-account-funds' ), 'error' );
-			return;
-		}
-
-		// deduct amount from account funds
-		WC_Account_Funds::remove_funds( $order->get_user_id(), $order->get_total() );
-		update_post_meta( $order_id, '_funds_used', $order->get_total() );
-		update_post_meta( $order_id, '_funds_removed', 1 );
+		// deduct points from account
+		WC_Points_Rewards_Manager::decrease_points( $user_id, $total_points, 'custom-points-gateway' );
+        
 		$order->set_total( 0 );
 
 		// Payment complete
@@ -125,48 +119,5 @@ class WC_Points_Payment extends WC_Payment_Gateway {
 			'result'    => 'success',
 			'redirect'  => $this->get_return_url( $order )
 		);
-	}
-
-	/**
-	 * @param float $amount
-	 * @param WC_Order $order
-	 * @param int $product_id
-	 * @return bool|WP_Error
-	 */
-	public function scheduled_subscription_payment( $amount, $order, $product_id ) {
-		$order_items        = $order->get_items();
-		$product            = $order->get_product_from_item( array_shift( $order_items ) );
-		$subscription_name  = sprintf( __( 'Subscription for "%s"', 'woocommerce-account-funds' ), $product->get_title() ) . ' ' . sprintf( __( '(Order %s)', 'woocommerce-account-funds' ), $order->get_order_number() );
-		$user_id            = $order->get_user_id();
-		$error              = false;
-
-		if ( ! $user_id ) {
-			WC_Subscriptions_Manager::process_subscription_payment_failure_on_order( $order, $product_id );
-			return new WP_Error( 'accountfunds', __( 'Customer not found', 'woocommerce-account-funds' ) );
-		}
-
-		$funds = WC_Account_Funds::get_account_funds( $user_id );
-
-		if ( $amount > $funds ) {
-			WC_Subscriptions_Manager::process_subscription_payment_failure_on_order( $order, $product_id );
-			return new WP_Error( 'accountfunds', __( 'Insufficient funds', 'woocommerce-account-funds' ) );
-		}
-
-		WC_Account_Funds::remove_funds( $order->get_user_id(), $amount );
-		WC_Subscriptions_Manager::process_subscription_payments_on_order( $order );
-
-		$order->add_order_note( __( 'Account Funds subscription payment completed', 'woocommerce-account-funds' ) );
-
-		return true;
-	}
-
-	/**
-	 * Payment method name
-	 */
-	public function subscription_payment_method_name( $payment_method_to_display, $subscription_details, $order ) {
-		if ( $this->id !== $order->recurring_payment_method || ! $order->customer_user ) {
-			return $payment_method_to_display;
-		}
-		return sprintf( __( 'Via %s', 'woocommerce-account-funds' ), $this->method_title );
 	}
 }

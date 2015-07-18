@@ -1,15 +1,15 @@
 <?php
 /*
- * Plugin Name: Custom Points Product
+ * Plugin Name: WOD Engine
  * Version: 1.0
- * Plugin URI: http://www.hughlashbrooke.com/
- * Description: This is your starter template for your next WordPress plugin.
+ * Plugin URI: http://www.crystalline-design.com
+ * Description: Required features for WOD to work properly.
  * Author: Hugh Lashbrooke
- * Author URI: http://www.hughlashbrooke.com/
+ * Author URI: http://www.crystalline-design.com
  * Requires at least: 4.0
  * Tested up to: 4.0
  *
- * Text Domain: custom-points-product
+ * Text Domain: wod-engine
  * Domain Path: /lang/
  *
  * @package WordPress
@@ -66,6 +66,14 @@ class WC_Custom_Points {
 
   }
 
+    /**
+    * Add the Gateway to WooCommerce
+    **/
+    public function woocommerce_add_points_gateway($methods) {
+        $methods[] = 'WC_Points_Payment';
+        return $methods;
+    }
+
   /**
    * Take care of anything that needs all plugins to be loaded
    */
@@ -74,17 +82,20 @@ class WC_Custom_Points {
       // Load plugin class files
       require_once( plugin_dir_path . '/includes/class-custom-points-product.php' );
       require_once( plugin_dir_path . '/includes/class-custom-points-product-settings.php' );
+      require_once( plugin_dir_path . '/includes/class-custom-points-order.php' );
+      require_once( plugin_dir_path . '/includes/class-custom-points-payment-gateway.php' );
 
       $settings = new Custom_Points_Product_Settings();
 
       add_action('woocommerce_points_add_to_cart', array($this, 'add_to_cart'),30);
-
+      add_filter('woocommerce_payment_gateways', array($this, 'woocommerce_add_points_gateway') );
   }
 
 
     public function add_to_cart() {
         wc_get_template( 'single-product/add-to-cart/points.php',$args = array(), $template_path = '', YOUR_TEMPLATE_PATH);
 }
+
 }
 
 // finally instantiate our plugin class and add it to the set of globals

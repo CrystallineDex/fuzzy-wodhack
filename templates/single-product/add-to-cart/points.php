@@ -1,6 +1,6 @@
 <?php
 /**
- * External product add to cart
+ * Simple product add to cart
  *
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
@@ -9,36 +9,41 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-global $post;
-$points_to_deduct = get_post_meta($post->ID, 'points_product_cost');
+global $woocommerce, $product;
 
+if ( ! $product->is_purchasable() ) return;
 ?>
-<?php do_action( 'woocommerce_before_add_to_cart_button' ); ?>
 
 <?php
+	// Availability
+	$availability = $product->get_availability();
 
-if (isset($_POST["submit"]))
-{
-    if ($_POST["formid"] == $_SESSION["formid"])
-    {
-        $_SESSION["formid"] = '';
-
-        get_product()->process_points( $post->ID );
-        echo 'Process form';
-    }
-    else
-        echo 'Don\'t process form';
-}
-else
-{
-    $_SESSION["formid"] = md5(rand(0,10000000));
+	if ( $availability['availability'] )
+		echo apply_filters( 'woocommerce_stock_html', '<p class="stock ' . esc_attr( $availability['class'] ) . '">' . esc_html( $availability['availability'] ) . '</p>', $availability['availability'] );
 ?>
 
-<form method="post">
-    <input type="hidden" name="formid" value="<?php echo $_SESSION["formid"]; ?>" />
-    <button type="submit" name="submit">Spend <?php echo $points_to_deduct[0] ?> Point(s).</button>
-</form>
+<?php if ( $product->is_in_stock() ) : ?>
 
-<?php } ?>
+	<?php do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 
-<?php do_action( 'woocommerce_after_add_to_cart_button' ); ?>
+	<form class="cart" method="post" enctype='multipart/form-data'>
+	 	<?php do_action( 'woocommerce_before_add_to_cart_button' ); ?>
+
+	 	<?php
+	 		if ( ! $product->is_sold_individually() )
+	 			woocommerce_quantity_input( array(
+	 				'min_value' => apply_filters( 'woocommerce_quantity_input_min', 1, $product ),
+	 				'max_value' => apply_filters( 'woocommerce_quantity_input_max', $product->backorders_allowed() ? '' : $product->get_stock_quantity(), $product )
+	 			) );
+	 	?>
+
+	 	<input type="hidden" name="add-to-cart" value="<?php echo esc_attr( $product->id ); ?>" />
+
+	 	<button type="submit" class="single_add_to_cart_button medium button blue"><?php echo $product->single_add_to_cart_text(); ?></button>
+
+		<?php do_action( 'woocommerce_after_add_to_cart_button' ); ?>
+	</form>
+
+	<?php do_action( 'woocommerce_after_add_to_cart_form' ); ?>
+
+<?php endif; ?>
