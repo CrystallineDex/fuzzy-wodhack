@@ -32,11 +32,28 @@ class Custom_Points_Main_Admin {
             $actions = $section['actions'];
             
             foreach($actions as $action){
-                echo '<li><a class="button" href="' . $action['url'] . '">'. $action['title'] . '</a></li>';
+                echo '<li><a class="button ' . $action['class'] . '" href="' . $action['url'] . '">'. $action['title'] . '</a></li>';
             }
             
             echo '</ul>';
         }
+        
+        $script = '<script>
+                jQuery(".wod-add-gym").click( function(e){
+                    e.preventDefault();
+                    console.log("HI MOM");
+                    var value = "wod-add-gym",
+                        ajaxUrl = "' . plugins_url('ajax-product.php', __FILE__) . '",
+                        data = { "action" : value };
+                        
+                        jQuery.post(ajaxUrl, data, function(response){
+                            console.log("Response");
+                        });
+                    
+                });
+            </script>';
+        
+        echo $script;
     }
     
     // Populate data for custom WOD dashboard widget
@@ -48,7 +65,13 @@ class Custom_Points_Main_Admin {
                 'actions' => array(
                     array(
                         'title' => 'View Gyms',
-                        'url' => admin_url('edit.php?product_cat=cfgyms&post_type=product')
+                        'url' => admin_url('edit.php?product_cat=cfgyms&post_type=product'),
+                        'class' => ''
+                    ),
+                    array(
+                        'title' => 'Add Gym',
+                        'url' => '',
+                        'class' => 'wod-add-gym'
                     )
                 )
             ),
@@ -57,11 +80,13 @@ class Custom_Points_Main_Admin {
                 'actions' => array(
                     array(
                         'title' => 'Manage Points',
-                        'url' => admin_url('admin.php?page=woocommerce-points-and-rewards')
+                        'url' => admin_url('admin.php?page=woocommerce-points-and-rewards'),
+                        'class' => ''
                     ),
                     array(
                         'title' => 'View Points Log',
-                        'url' => admin_url('admin.php?page=woocommerce-points-and-rewards&tab=log')
+                        'url' => admin_url('admin.php?page=woocommerce-points-and-rewards&tab=log'),
+                        'class' => ''
                     )
                 )
             ),
@@ -88,6 +113,22 @@ class Custom_Points_Main_Admin {
         remove_meta_box( 'dashboard_activity', 'dashboard', 'normal');//since 3.8
         remove_meta_box( 'woocommerce_dashboard_recent_reviews', 'dashboard', 'normal' );
         remove_meta_box( 'rg_forms_dashboard', 'dashboard', 'normal' );
+    }
+    
+    
+    
+    // Create a gym with all the necessary settings
+    public function create_gym_product() {
+        global $wpdb;
+        
+        $post = array(
+             'post_title'   => "New Gym",
+             'post_status'  => "draft",
+             'post_type'    => "product"
+         );
+        
+        $new_post_id = wp_insert_post( $post, $wp_error );
+        wp_redirect( get_permalink( $new_post_id ) );
     }
 
 }
