@@ -80,6 +80,7 @@ class WC_Custom_Points {
   public function plugins_loaded() {
 
       // Load plugin class files
+      require_once( plugin_dir_path . '/includes/admin/class-main-admin.php' );
       require_once( plugin_dir_path . '/includes/class-custom-points-product.php' );
       require_once( plugin_dir_path . '/includes/class-custom-points-product-settings.php' );
       require_once( plugin_dir_path . '/includes/class-custom-points-order.php' );
