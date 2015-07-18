@@ -7,6 +7,7 @@ class Custom_Points_Main_Admin {
 	public function __construct(){
         // Remove all other dashboard widgets for ease of use
         add_action( 'admin_init', array( $this, 'remove_dashboard_meta' ) );
+        wp_enqueue_style('wod_admin_style', plugins_url('styles/admin.css', __FILE__));
         add_action( 'wp_dashboard_setup', array( $this, 'add_wod_dashboard_widget' ), 20 );
     }
 
@@ -24,12 +25,15 @@ class Custom_Points_Main_Admin {
         
         foreach($sections as $section){
             echo '<h4><strong>' . $section['title'] . '</strong></h4><hr>';
+            echo '<ul class="actions">';
             
             $actions = $section['actions'];
             
             foreach($actions as $action){
-                echo '<a class="button" href="' . $action['url'] . '">'. $action['title'] . '</a>';
+                echo '<li><a class="button" href="' . $action['url'] . '">'. $action['title'] . '</a></li>';
             }
+            
+            echo '</ul>';
         }
     }
     
@@ -39,7 +43,10 @@ class Custom_Points_Main_Admin {
             array(
                 'title' => 'Gyms',
                 'actions' => array(
-                
+                    array(
+                        'title' => 'View Gyms',
+                        'url' => admin_url('edit.php?product_cat=cfgyms&post_type=product')
+                    )
                 )
             ),
             array(
