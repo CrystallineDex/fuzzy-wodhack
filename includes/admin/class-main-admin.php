@@ -19,7 +19,49 @@ class Custom_Points_Main_Admin {
     }
     
     public function wod_dashboard_widget_function() {
-        echo "Initial dashboard widget.";
+        
+        $sections = $this->wod_dashboard_widget_builder();
+        
+        foreach($sections as $section){
+            echo '<h4><strong>' . $section['title'] . '</strong></h4><hr>';
+            
+            $actions = $section['actions'];
+            
+            foreach($actions as $action){
+                echo '<a class="button" href="' . $action['url'] . '">'. $action['title'] . '</a>';
+            }
+        }
+    }
+    
+    private function wod_dashboard_widget_builder(){
+        
+        $sections = array(
+            array(
+                'title' => 'Gyms',
+                'actions' => array(
+                
+                )
+            ),
+            array(
+                'title' => 'Members',
+                'actions' => array(
+                    array(
+                        'title' => 'Manage Points',
+                        'url' => admin_url('admin.php?page=woocommerce-points-and-rewards')
+                    ),
+                    array(
+                        'title' => 'View Points Log',
+                        'url' => admin_url('admin.php?page=woocommerce-points-and-rewards&tab=log')
+                    )
+                )
+            ),
+            array(
+                'title' => 'WOD',
+                'actions' => array()
+            ),  
+        );
+        
+        return $sections;
     }
     
     public function remove_dashboard_meta() {
