@@ -19,6 +19,8 @@ class Custom_Points_Main_Admin {
         );	
     }
     
+    
+    // Create the custom WOD dashboard widget for easy client usage
     public function wod_dashboard_widget_function() {
         
         $sections = $this->wod_dashboard_widget_builder();
@@ -37,6 +39,7 @@ class Custom_Points_Main_Admin {
         }
     }
     
+    // Populate data for custom WOD dashboard widget
     private function wod_dashboard_widget_builder(){
         
         $sections = array(
@@ -71,6 +74,8 @@ class Custom_Points_Main_Admin {
         return $sections;
     }
     
+    
+    // Removes a bunch of dashboard widgets
     public function remove_dashboard_meta() {
         remove_meta_box( 'dashboard_incoming_links', 'dashboard', 'normal' );
         remove_meta_box( 'dashboard_plugins', 'dashboard', 'normal' );
