@@ -12,13 +12,13 @@ class Custom_Points_Main_Admin {
 
     public function add_wod_dashboard_widget(){
         wp_add_dashboard_widget(
-                 'wod_dashboard_widget',         // Widget slug.
-                 'WodTicket',         // Title.
-                 array( $this, 'example_dashboard_widget_function' ) // Display function.
+             'wod_dashboard_widget',         // Widget slug.
+             'WodTicket',         // Title.
+             array( $this, 'wod_dashboard_widget_function' ) // Display function.
         );	
     }
     
-    public function example_dashboard_widget_function() {
+    public function wod_dashboard_widget_function() {
         echo "Initial dashboard widget.";
     }
     
