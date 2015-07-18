@@ -4,7 +4,7 @@
  * Version: 1.0
  * Plugin URI: http://www.crystalline-design.com
  * Description: Required features for WOD to work properly.
- * Author: Hugh Lashbrooke
+ * Author: Alex Ritchey
  * Author URI: http://www.crystalline-design.com
  * Requires at least: 4.0
  * Tested up to: 4.0
@@ -13,7 +13,7 @@
  * Domain Path: /lang/
  *
  * @package WordPress
- * @author Hugh Lashbrooke
+ * @author Alex Ritchey
  * @since 1.0.0
  */
 
